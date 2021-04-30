@@ -1,0 +1,33 @@
+model{
+  
+  ### Outcome model: priors
+  beta ~ dmnorm(betamean,betaprec)
+  
+  ### Outcome model: priors
+  alpha ~ dmnorm(alphamean,alphaprec)
+
+  ### prior distribution for measurement model params
+  ### X*|Z ~ gamma + X + error
+  gamma ~ dnorm(gammamean,gammaprec)
+
+  ### Variances (precisions) of true X and Y, as well as X*
+  taux ~ dgamma(0.5,0.5) # for X
+  tauy ~ dgamma(0.5,0.5) # for Y
+  tauxstr~ dgamma(0.5,0.5) # for X*
+  
+  ### statistical model
+  for (i in 1:n1) {
+  
+    ### Joint distn of X and Z
+    mux[i] <- alpha[1] + alpha[2]*z[i]
+    x[i] ~ dnorm(mux[i], taux)
+    
+    ### Measurement model, assumes no measurement error bias, only variance
+    xstr[i] ~ dnorm(x[i], tauxstr)
+    
+    ### Outcome model
+    muy[i] = beta[1] + beta[2]*x[i] + beta[3]*z[i]
+    y[i] ~ dnorm(muy[i], tauy)
+  }
+
+}
